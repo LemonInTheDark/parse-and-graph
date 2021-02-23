@@ -48,7 +48,7 @@ for f_name in input:
         avg_players = player_total / lines_read
 
     if map not in writers: #If one doesn't already exist, make a new writer to put our map data into
-        files[map] = open("maptick/" + map + ".csv", 'w')
+        files[map] = open(output_loc + map + ".csv", 'w')
         writers[map] = csv.DictWriter(files[map], fieldnames=fieldnames)
         writers[map].writeheader()
 
