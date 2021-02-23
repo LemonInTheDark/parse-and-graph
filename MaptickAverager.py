@@ -34,7 +34,8 @@ for f_name in input:
     csvfile.close()
 
     properties = f_name.split("-") #This will get messy if you have a - in the system path
-
+    if len(f_name.split("-")) < 2:
+        print("ERROR: [" + f_name + "] Is being improperly parsed")
     id = f_name.split("-")[1] #The second item in this list should be id
     map = f_name.split("-")[2].split(".")[0] #The third item is the map name + the .csv bit. Let's cut that out.
 

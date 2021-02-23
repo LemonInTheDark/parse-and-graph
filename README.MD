@@ -5,6 +5,8 @@ It scrapes all available performance logs, processes them into csv files (One fo
 
 ## Scraping
 
+We don't scrape all performance logs, since some of them from before 2020/11/11 don't scrape well and don't match the current system.
+
 Since the performance logs are currently not publicly accessible (As of 2020/23/2), you will need to have an account with the permissions to view these things. If you do, copy paste the cookie information from the request sent when opening one of the raw log pages into `mood.json`. This will be used to authenticate as you to get the logs needed. **DO NOT MAKE THIS FILE PUBLIC**
 
 ## Parsing

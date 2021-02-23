@@ -33,8 +33,8 @@ def scrape(url):
     #Ready for some hellcode to prevent scraping 2010 logs?
     split_url = url.split("/")
     split_url.reverse() #Flip it so we can read top down
-    #Pref logging was merged on the 7th of November 2020, this prevents overshooting when taking the initial copy of the logs 
-    if split_url[1] == "7" and split_url[2] == "11" and split_url[3] == "2020":  
+    #Fully functional performance logging was merged on the 10th of November 2020, this prevents overshooting when taking the initial copy of the logs 
+    if split_url[1] == "11" and split_url[2] == "11" and split_url[3] == "2020":  
         return -1
 
     files_to_investigate = listFD(url)
