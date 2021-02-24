@@ -1,4 +1,4 @@
-# Maptick scarper/parsing tool
+# Maptick scraper/parsing tool
 This is a tool developed to aid in the tracking of maptick for the /tg/station server.
 
 It scrapes all available performance logs, processes them into csv files (One for each map, and one global one), and then uses `gnuplot` to plot them in a few different ways I've judged as useful.
