@@ -7,7 +7,7 @@ output_loc = "maptick/"
 if not os.path.exists(output_loc):
     os.makedir(output_loc)
     
-output_to = output_loc + "maptick.csv"
+output_to = f"{output_loc}maptick.csv"
 movingmax = 249 #Max size of the moving average, starts at 0
 
 fieldnames = ["id", "maptick_to_player", "avg_maptick_to_player", "maptick", "players", "avg_players"]
@@ -35,7 +35,7 @@ for f_name in input:
 
     properties = f_name.split("-") #This will get messy if you have a - in the system path
     if len(f_name.split("-")) < 2:
-        print("ERROR: [" + f_name + "] Is being improperly parsed")
+        print(f"ERROR: [{f_name}] Is being improperly parsed")
     id = f_name.split("-")[1] #The second item in this list should be id
     map = f_name.split("-")[2].split(".")[0] #The third item is the map name + the .csv bit. Let's cut that out.
 
@@ -49,7 +49,7 @@ for f_name in input:
         avg_players = player_total / lines_read
 
     if map not in writers: #If one doesn't already exist, make a new writer to put our map data into
-        files[map] = open(output_loc + map + ".csv", 'w')
+        files[map] = open(f"{output_loc}{map}.csv", 'w')
         writers[map] = csv.DictWriter(files[map], fieldnames=fieldnames)
         writers[map].writeheader()
 
@@ -86,7 +86,7 @@ for f_name in input:
 
         writer = writers[index]
         writer.writerow({'id': id, 'maptick_to_player': maptick_by_players, 'avg_maptick_to_player': avgs["maptick_over"], 'maptick': avg_maptick, "players": avg_players, "avg_players": avgs["player_count"]})
-    print("Wrote [" + id + "] [" + map + "]")
+    print(f"Wrote [{id}] [{map}]")
 
 for name, file in files.items():
     file.close()

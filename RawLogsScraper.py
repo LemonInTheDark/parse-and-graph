@@ -23,12 +23,12 @@ cookie_file = "mood.json"
 def get_raw_logs(requestTarget) :
     response = requests.get(requestTarget, headers = fakingIdentity)
     if response.status_code != 200: #If we time out don't spawm mso too hard
-        print("A raw request failed to return 200 OK, instead returning [" + str(response.status_code) + "]. stopping investigation")
+        print(f"A raw request failed to return 200 OK, instead returning [{str(response.status_code)}]. stopping investigation")
         return
     return response
 
 def scrape(url):
-    print("scraping [" + url + "] ...")
+    print(f"Scraping [{url}] ...")
 
     #Ready for some hellcode to prevent scraping 2010 logs?
     split_url = url.split("/")
@@ -41,7 +41,7 @@ def scrape(url):
     files_to_investigate.reverse() #Reverse so you don't fail when trying to read a folder that existed before the logs existed
 
     if not files_to_investigate: #If you time out, end execution
-        print("No files in " + str(files_to_investigate))
+        print(f"No files in {str(files_to_investigate)}")
     for file in files_to_investigate:
         if file == "../":
             continue
@@ -55,7 +55,7 @@ def scrape(url):
 def listFD(url):
     page = get_raw_logs(url)
     if not page:
-        print("The page does not exist [" + str(page) + "]") 
+        print(f"The page does not exist [{str(page)}]") 
         return
     soup = BeautifulSoup(page.text, 'html.parser')
     return [node.get('href') for node in soup.find_all('a')]
@@ -65,7 +65,7 @@ def readFile(file, path):
     #The exists check prevents overscanning, if you fuck something up comment it out 
     if not response or os.path.exists(outputFolder + path): 
         return -1
-    print("Writing out [" + file + "]")
+    print(f"Writing out [{file}]")
     file = open(outputFolder + path, 'w') 
     file.write(response.text)
     file.close()
@@ -78,5 +78,5 @@ if not os.path.exists(outputFolder):
     os.mkdir(outputFolder)
 
 for name in serverNames:
-    url = "https://tgstation13.org/raw-logs/" + name + "/data/logs/"
+    url = f"https://tgstation13.org/raw-logs/{name}/data/logs/"
     scrape(url)
