@@ -62,6 +62,7 @@ def listFD(url):
 
 def readFile(file, path):
     response = get_raw_logs(file)
+    path = path.rstrip('.gz')
     #The exists check prevents overscanning, if you fuck something up comment it out 
     if not response or os.path.exists(outputFolder + path): 
         return -1
@@ -78,5 +79,5 @@ if not os.path.exists(outputFolder):
     os.mkdir(outputFolder)
 
 for name in serverNames:
-    url = f"https://tgstation13.org/raw-logs/{name}/data/logs/"
+    url = f"https://tgstation13.org/parsed-logs/{name}/data/logs/"
     scrape(url)
