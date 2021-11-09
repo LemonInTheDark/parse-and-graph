@@ -1,7 +1,4 @@
-root/output/*
-root/maptick/*
-root/compiled/*
-root/images/*
+
 root/single_round/*/*
 root/single_round/temporary.csv
 root/mood.json

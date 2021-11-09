@@ -24,7 +24,7 @@ else:
     id = int(input("What round number do you want to graph?\n"))    
     path = f"{read_from}*{id}*.csv"
 
-print(path)
+print(f"Searching for: ({path})")
 inputfiles = glob.glob(path)
 print(inputfiles)
 
