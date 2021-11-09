@@ -41,4 +41,4 @@ You can specify what path to use yourself, the system will fuzzy match for it, o
 
 Graphs the data created by SingleRound. As I mentioned before it splits things up into 6 png files, the first contains most traditionally useful information, the rest are just dumps of maptick statistics. Need a better way of handling these
 
-Calling the gnuplot manually will let you name things a bit more uniquely, if you'd like. If you don't it'll be organized by unix timestamp
+Calling the gnuplot manually will let you name things a bit more uniquely, if you'd like. If you don't it'll be organized by unix timestamp inside [single_round](single_round/)
