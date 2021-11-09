@@ -1,3 +1,5 @@
 root/mood.json
 settings.json
 round.csv.gz
+round.csv
+parseRoundInfoTable.py

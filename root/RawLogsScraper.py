@@ -15,6 +15,7 @@ fakingIdentity = {
     "Upgrade-Insecure-Requests": "1"
 }
 
+# Main servers, let's not pull ehalls since that just muddles data, and campbell because the logs aren't in the same setup yet
 serverNames = ["manuel", "basil", "sybil", "terry"]
 
 outputFolder = "output/"
@@ -27,7 +28,7 @@ def get_raw_logs(requestTarget) :
         return
     return response
 
-def scrape(url):
+def scrape(url, serverName):
     print(f"Scraping [{url}] ...")
 
     #Ready for some hellcode to prevent scraping 2010 logs?
@@ -46,11 +47,11 @@ def scrape(url):
         if file == "../":
             continue
         if "." not in file:
-            if scrape(url + file) == -1: #Propogate failure up the chain
+            if scrape(url + file, serverName) == -1: #Propogate failure up the chain
                 return -1 
         if ".csv" not in file : #Not what we're after
             continue
-        return readFile(url + file, file) #Propogate failure up the chain
+        return readFile(url + file, file, serverName) #Propogate failure up the chain
         
 def listFD(url):
     page = get_raw_logs(url)
@@ -60,9 +61,13 @@ def listFD(url):
     soup = BeautifulSoup(page.text, 'html.parser')
     return [node.get('href') for node in soup.find_all('a')]
 
-def readFile(file, path):
+def readFile(file, path, serverName):
     response = get_raw_logs(file)
     path = path.rstrip('.gz')
+    path_parts = path.split(".")
+    path_parts[0] += f"-{serverName}"
+    path = ".".join(path_parts)
+
     #The exists check prevents overscanning, if you fuck something up comment it out 
     if not response or os.path.exists(outputFolder + path): 
         return -1
@@ -80,4 +85,4 @@ if not os.path.exists(outputFolder):
 
 for name in serverNames:
     url = f"https://tgstation13.org/parsed-logs/{name}/data/logs/"
-    scrape(url)
+    scrape(url, name)
