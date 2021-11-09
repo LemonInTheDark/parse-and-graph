@@ -244,11 +244,14 @@ for index in range(id_start_at, len(input)):
         td_total += float(row["tidi_avg"]) 
     csvfile.close()
 
-    properties = f_name.split("-") #This will get messy if you have a - in the system path
-    if len(f_name.split("-")) < 2:
+    #In the template perf-[roundid]-[mapname]-[servername].csv
+    file_without_ending = f_name.split(".")[0] 
+    properties = file_without_ending.split("-") #This will get messy if you have a - in the system path
+    if len(properties) < 3:
         print(f"ERROR: [{f_name}] Is being improperly parsed")
-    id = f_name.split("-")[1] #The second item in this list should be id
-    map = f_name.split("-")[2].split(".")[0] #The third item is the map name + the .csv bit. Let's cut that out.
+    id = properties[1] #The second item in this list should be id
+    map = properties[2] #The third item is the map name
+    server = properties[3] #Fourth term's the server this round came from, we'll need that soon
 
     maptick_by_players = 0
     td_by_players = 0
@@ -264,7 +267,7 @@ for index in range(id_start_at, len(input)):
         avg_td = td_total / lines_read
 
     #I'm sorry
-    pending = [map, "maptick", "highpass_maptick"]
+    pending = [map, server, "maptick", "highpass_maptick"]
     for index in pending:
         if index not in data: #If one doesn't already exist, make a new list to put our map data into
             data[index] = []
@@ -282,7 +285,7 @@ for index in range(id_start_at, len(input)):
         to_write["td_to_player"] = td_by_players
         data[index].append(to_write)
 
-    print(f"Read [{id}] [{map}]")
+    print(f"Read [{id}] [{map}] [{server}]")
 
 #Now that we've done a first pass, we need to go back over things again 
 #These are all the file names that need operating on
@@ -384,10 +387,10 @@ for index in data:
         rnd_id = row["id"]
         print(f"Write [{index}] [{i}] [{rnd_id}]")
 
-    last_good_map_round = working_list[-min(len(working_list), total_moving_space)]["id"]
-    data_log[key] = last_good_map_round
+    last_good_subset_round = working_list[-min(len(working_list), total_moving_space)]["id"]
+    data_log[key] = last_good_subset_round
     if index in maps_we_care_about:
-        data_log["last_round_fully_processed"] = min(int(last_good_map_round), int(data_log["last_round_fully_processed"]))
+        data_log["last_round_fully_processed"] = min(int(last_good_subset_round), int(data_log["last_round_fully_processed"]))
 
     output = open(f"{output_loc}{index}.csv", 'w')
     output.write(write_to_file)
