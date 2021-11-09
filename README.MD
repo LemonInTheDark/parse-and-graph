@@ -28,7 +28,9 @@ If you'd like to learn more about any of this go read [root/README.md](root/READ
 ## Dependencies
 
 This project was created with `python 3.6`, you'll need at least `python 3` for the logs parser to run properly.
-Additionally you will need gnuplot installed, with a version above 5. This is to support graphing several files onto one graph.
+It uses the beautiful soup html parsing library to walk webpages, so you'll need that too. [Have a Link](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
+
+Additionally you will need gnuplot installed, with a version above 5. This is to support graphing several files onto one graph. Needs to be in your path too, because I'm a moron. [Have another Link](http://www.gnuplot.info/)
 
 ## License
 
