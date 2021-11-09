@@ -7,7 +7,7 @@
 Not a whole lot to say here, this scrapes round and map information from the tgstation13.org public logs.
 There's a list of servers to pull from if you'd like to futz around with it. We don't actually have support for graphing by round right now, I'll add that later maybe.
 
-Oh right uh, mood.json exists. Create one and edit it to match your server creds if for some reason you want to pull from raw logs (Don't forget to change the url). Or just like, don't? I don't remember if you need to for public logs or not.
+Oh right uh, mood.json exists. Create one and edit it to match your server creds if for some reason you want to pull from raw logs (Don't forget to change the url)
 
 ### [MaptickAverager](MaptickAverager.py)
 

@@ -17,9 +17,14 @@ fakingIdentity = {
 
 # Main servers, let's not pull ehalls since that just muddles data, and campbell because the logs aren't in the same setup yet
 serverNames = ["manuel", "basil", "sybil", "terry"]
-
 outputFolder = "output/"
-cookie_file = "mood.json"
+
+#Only uncomment these if you for some reason need to read raw logs
+
+#cookie_file = "mood.json"
+#do_not_post_this_4head = open(cookie_file) 
+#fakingIdentity = json.load(do_not_post_this_4head) #Loads a .json file containing the cookie and other params to send to mso
+#do_not_post_this_4head.close()
 
 def get_raw_logs(requestTarget) :
     response = requests.get(requestTarget, headers = fakingIdentity)
@@ -75,10 +80,6 @@ def readFile(file, path, serverName):
     file = open(outputFolder + path, 'w') 
     file.write(response.text)
     file.close()
-
-do_not_post_this_4head = open(cookie_file)
-fakingIdentity = json.load(do_not_post_this_4head) #Loads a .json file containing the cookie and other params to send to mso
-do_not_post_this_4head.close()
 
 if not os.path.exists(outputFolder):
     os.mkdir(outputFolder)
