@@ -12,20 +12,21 @@ outputfile1 = sprintf("%s Highpass%s", filename, outputformat)
 outputfile2 = sprintf("%s%s", filename, outputformat)
 outputfile3 = sprintf("%s Average%s", filename, outputformat)
 outputfile4 = sprintf("%s Average By Map%s", filename, outputformat)
+outputfile5 = sprintf("%s Average by Server%s", filename, outputformat)
 
 filename = "Pop"
 filename = sprintf("%s%s", outputfolder, filename)
-outputfile5 = sprintf("%s%s", filename, outputformat)
-outputfile6 = sprintf("%s By Map%s", filename, outputformat)
+outputfile6 = sprintf("%s%s", filename, outputformat)
+outputfile7 = sprintf("%s By Map%s", filename, outputformat)
+outputfile8 = sprintf("%s By Server%s", filename, outputformat)
+
 
 filename = "TD"
 filename = sprintf("%s%s", outputfolder, filename)
-outputfile7 = sprintf("%s Average%s", filename, outputformat)
-outputfile8 = sprintf("%s Average By Map%s", filename, outputformat)
-outputfile9 = sprintf("%s%s", filename, outputformat)
-outputfile10 = sprintf("%s By Map%s", filename, outputformat)
-outputfile11 = sprintf("%s Over Pop%s", filename, outputformat)
-outputfile12 = sprintf("%s Ober Pop By Map%s", filename, outputformat)
+outputfile9 = sprintf("%s Average%s", filename, outputformat)
+outputfile10 = sprintf("%s Average By Map%s", filename, outputformat)
+outputfile11 = sprintf("%s Average By Server%s", filename, outputformat)
+outputfile12 = sprintf("%s%s", filename, outputformat)
 
 set key autotitle columnheader 
 set key noenhanced
@@ -65,47 +66,46 @@ set title "Average Maptick Over Player Count"
 plot highpass using 1:7 with lines title "Maptick Per Player", "labels.csv" using 2:3:1 with labels title ""
 
 #I hate this fuck you admin team
-files = "Delta%20Station.csv Ice%20Box%20Station.csv Kilo%20Station.csv MetaStation.csv PubbyStation.csv Tramstation.csv"
+mapfiles = "Delta%20Station.csv Ice%20Box%20Station.csv Kilo%20Station.csv MetaStation.csv PubbyStation.csv Tramstation.csv"
+serverfiles = "manuel.csv basil.csv sybil.csv terry.csv"
 #files = system('dir /B *Station.csv') #GOD DAMN IT WINDOWS GIVE ME REGEX AHHHHHHHHHHHHHHHHHHHH
 
 set output outputfile4
 set title "Average Maptick Over Player Count By Map"
-plot for [file in files] sprintf("%s%s", inputfolder, file) using 1:7 with lines title file 
+plot for [file in mapfiles] sprintf("%s%s", inputfolder, file) using 1:7 with lines title file 
+
+set output outputfile5
+set title "Average Maptick Over Player Count By Server"
+plot for [file in serverfiles] sprintf("%s%s", inputfolder, file) using 1:7 with lines title file 
 
 set ylabel 'Player Count'
 
-set output outputfile5
+set output outputfile6
 set title "Average Player Count"
 plot inputfile using 1:15 with lines
 
-set output outputfile6
+set output outputfile7
 set title "Average Player Count By Map"
-plot for [file in files] sprintf("%s%s", inputfolder, file) using 1:15 with lines title file
+plot for [file in mapfiles] sprintf("%s%s", inputfolder, file) using 1:15 with lines title file
+
+set output outputfile8
+set title "Average Player Count By Server"
+plot for [file in serverfiles] sprintf("%s%s", inputfolder, file) using 1:15 with lines title file
 
 set ylabel 'TD'
 
-set output outputfile7
+set output outputfile9
 set title "Average TD"
 plot inputfile using 1:16 with lines
 
-set output outputfile8
-set title "Average TD By Map"
-plot for [file in files] sprintf("%s%s", inputfolder, file) using 1:16 with lines title file
-
-set output outputfile9
-set title "TD"
-plot inputfile using 1:5 with lines title "TD"
-
 set output outputfile10
-set title "TD By Map"
-plot for [file in files] sprintf("%s%s", inputfolder, file) using 1:5 with lines title file
-
-set ylabel 'TD Per Person'
+set title "Average TD By Map"
+plot for [file in mapfiles] sprintf("%s%s", inputfolder, file) using 1:16 with lines title file
 
 set output outputfile11
-set title "TD Over Players"
-plot inputfile using 1:6 with lines title "TD Over Pop"
+set title "Average TD By Server"
+plot for [file in serverfiles] sprintf("%s%s", inputfolder, file) using 1:16 with lines title file
 
 set output outputfile12
-set title "TD By Players By Map"
-plot for [file in files] sprintf("%s%s", inputfolder, file) using 1:6 with lines title file
+set title "TD"
+plot inputfile using 1:5 with lines title "TD"
