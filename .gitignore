@@ -1,5 +1,3 @@
-
-root/single_round/*/*
-root/single_round/temporary.csv
 root/mood.json
 settings.json
+round.csv.gz
