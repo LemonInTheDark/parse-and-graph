@@ -11,20 +11,16 @@ if(!exists("foldername")) foldername = sprintf("%u", time(0))
 command = "mkdir ".foldername
 system command
 
-if(!exists("outputfilename")) outputfilename = "maptick"
+if(!exists("outputfilename")) outputfilename = "Misc Maptick Numbers #"
 
 filename = sprintf("%s/%s", foldername, outputfilename)
 
-outputfile1 = sprintf("%s1%s", filename, outputformat)
-outputfile2 = sprintf("%s2%s", filename, outputformat)
-outputfile3 = sprintf("%s3%s", filename, outputformat)
-outputfile4 = sprintf("%s4%s", filename, outputformat)
-outputfile5 = sprintf("%s5%s", filename, outputformat)
-outputfile6 = sprintf("%s6%s", filename, outputformat)
-outputfile7 = sprintf("%s7%s", filename, outputformat)
-outputfile8 = sprintf("%s8%s", filename, outputformat)
-outputfile9 = sprintf("%s9%s", filename, outputformat)
-outputfile10 = sprintf("%s10%s", filename, outputformat)
+outputfile1 = sprintf("%s/Classic Stats%s", foldername, outputformat)
+outputfile2 = sprintf("%s1%s", filename, outputformat)
+outputfile3 = sprintf("%s2%s", filename, outputformat)
+outputfile4 = sprintf("%s3%s", filename, outputformat)
+outputfile5 = sprintf("%s4%s", filename, outputformat)
+outputfile6 = sprintf("%s5%s", filename, outputformat)
 
 set title "Deep Profiling"
 set key autotitle columnheader 
@@ -65,5 +61,3 @@ plot inputfile using 1:28 with lines, '' using 1:44 with lines, '' using 1:45 wi
 set output outputfile6
 set title "Complex Shit 5"
 plot inputfile using 1:28 with lines, '' using 1:49 with lines
-command = "cd .."
-system command

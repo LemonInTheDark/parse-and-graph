@@ -8,3 +8,4 @@ py SingleROUND.py
 echo Plotting Graphs
 cd single_round
 gnuplot single_round.gnuplot
+popd

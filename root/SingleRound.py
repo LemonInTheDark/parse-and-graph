@@ -18,8 +18,6 @@ for name in sendmaps_starting:
 fieldnames = ["time", "players", "maptick", "tidi_avg"]
 
 path = ""
-print(len(sys.argv))
-
 if len(sys.argv) > 1:
     path = f"{sys.argv[1]}*"
 else:
