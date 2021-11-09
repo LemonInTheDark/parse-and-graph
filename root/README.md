@@ -14,6 +14,8 @@ Oh right uh, mood.json exists. Create one and edit it to match your server creds
 This file's in charge of taking raw csv files and processing them. This includes a number of things
 I'll be brief, but almost all aspects of this process are modifiable. Changing any of the following vars in the python code will lead to full recompiles to match your changes.
 
+Let's see, there's a short period of time where maptick logging failed, those rounds aren't parsed. That's why some graphs have a short hop in them
+
 Oh on that note, we don't fully process our files all at once, because frankly I'm doing all this in python to prove a point to myself, so if we did it would be slow as balls. Information about the last compile is stored in [compiled/last_run.dat](compiled/last_run.dat), if you want to poke around, or just delete it to trigger a full recompile. Anyway.
 
 - The size of our moving average: `movingbackward movingforward`
