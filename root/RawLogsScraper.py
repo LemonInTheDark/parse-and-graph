@@ -1,4 +1,3 @@
-from bs4 import BeautifulSoup
 import json
 import requests
 import os.path
@@ -6,7 +5,7 @@ import os.path
 #Example inputs for the headers to pack with the request. Put yours in a dictonary in cookie_file
 fakingIdentity = {
     "Host": "tgstation13.org",
-    "User-Agent": "PISSOFF",
+    "User-Agent": "Default Graphing Scraper (Lemon Scented)",
     "Accept": "Remember to not accept zip files",
     "Accept-Language": "hhhhhhhhhhh",
     "Referer": "Pick Your Poison",
@@ -17,10 +16,13 @@ fakingIdentity = {
 
 # Main servers, let's not pull ehalls since that just muddles data, and campbell because the logs aren't in the same setup yet
 serverNames = ["manuel", "basil", "sybil", "terry"]
+
 outputFolder = "output/"
 
 #Only uncomment these if you for some reason need to read raw logs
 
+#owning mso with facts and logic (you need beautiful soup to parse raw logs for reasons)
+#from bs4 import BeautifulSoup
 #cookie_file = "mood.json"
 #do_not_post_this_4head = open(cookie_file) 
 #fakingIdentity = json.load(do_not_post_this_4head) #Loads a .json file containing the cookie and other params to send to mso
@@ -46,38 +48,53 @@ def scrape(url, serverName):
     files_to_investigate = listFD(url)
     files_to_investigate.reverse() #Reverse so you don't fail when trying to read a folder that existed before the logs existed
 
-    if not files_to_investigate: #If you time out, end execution
+    if not files_to_investigate: #If you time out, step up a level
         print(f"No files in {str(files_to_investigate)}")
-    for file in files_to_investigate:
-        if file == "../":
-            continue
-        if "." not in file:
-            if scrape(url + file, serverName) == -1: #Propogate failure up the chain
+    for entry in files_to_investigate:
+        filename = entry["name"]
+        newUrl = f"{url}/{filename}"
+        if entry["type"] == "directory":
+            if scrape(newUrl, serverName) == -1: #Propogate failure up the chain
                 return -1 
-        if ".csv" not in file : #Not what we're after
             continue
-        return readFile(url + file, file, serverName) #Propogate failure up the chain
+        #performance files are formatted like this
+        #perf-roundid-map-server.csv.gz
+        if filename.split("-")[0] != "perf" : #Not what we're after
+            continue
+        return readFile(newUrl, filename, serverName) #Propogate failure up the chain
         
+#Returns a list of dicts in the form {name, type (directory, file), mtime, size (for files)}
 def listFD(url):
-    page = get_raw_logs(url)
-    if not page:
-        print(f"The page does not exist [{str(page)}]") 
+    jsonUrl = f"{url}/?index_format=json"
+    jsonPage = get_raw_logs(jsonUrl)
+    if not jsonPage:
+        print(f"The page does not exist [{jsonUrl}]") 
         return
-    soup = BeautifulSoup(page.text, 'html.parser')
-    return [node.get('href') for node in soup.find_all('a')]
+    return json.loads(jsonPage.text)
 
-def readFile(file, path, serverName):
-    response = get_raw_logs(file)
-    path = path.rstrip('.gz')
-    path_parts = path.split(".")
-    path_parts[0] += f"-{serverName}"
-    path = ".".join(path_parts)
+#Uncomment and implement if you want to parse raw files
+#def listFDSoupy(url):
+    #page = get_raw_logs(url)
+    #if not page:
+    #    print(f"The page does not exist [{str(page)}]") 
+    #    return
+    #soup = BeautifulSoup(page.text, 'html.parser')
+    #return [node.get('href') for node in soup.find_all('a')]
+
+def readFile(url, name, serverName):
+    response = get_raw_logs(url)
+    name = name.rstrip('.gz')
+    name_parts = name.split(".")
+    name_parts[0] += f"-{serverName}"
+    name = ".".join(name_parts)
+    filename = outputFolder + name
 
     #The exists check prevents overscanning, if you fuck something up comment it out 
-    if not response or os.path.exists(outputFolder + path): 
-        return -1
-    print(f"Writing out [{file}]")
-    file = open(outputFolder + path, 'w') 
+    if not response or os.path.exists(filename): 
+        return
+    
+    print(f"Writing out [{filename}]")
+    file = open(filename, 'w') 
     file.write(response.text)
     file.close()
 
