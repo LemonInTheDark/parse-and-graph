@@ -66,7 +66,7 @@ set title "Average Maptick Over Player Count"
 plot highpass using 1:7 with lines title "Maptick Per Player", "labels.csv" using 2:3:1 with labels title ""
 
 #I hate this fuck you admin team
-mapfiles = "Delta%20Station.csv Ice%20Box%20Station.csv Kilo%20Station.csv MetaStation.csv PubbyStation.csv Tramstation.csv"
+mapfiles = "\"Delta Station.csv\" \"Ice Box Station.csv\" \"Kilo Station.csv\" \"MetaStation.csv\" \"PubbyStation.csv\" \"Tramstation.csv\""
 serverfiles = "manuel.csv basil.csv sybil.csv terry.csv"
 #files = system('dir /B *Station.csv') #GOD DAMN IT WINDOWS GIVE ME REGEX AHHHHHHHHHHHHHHHHHHHH
 
