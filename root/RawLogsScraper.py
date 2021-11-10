@@ -91,7 +91,7 @@ def readFile(url, name, serverName):
 
     #The exists check prevents overscanning, if you fuck something up comment it out 
     if not response or os.path.exists(filename): 
-        return
+        return -1
     
     print(f"Writing out [{filename}]")
     file = open(filename, 'w') 
@@ -102,5 +102,5 @@ if not os.path.exists(outputFolder):
     os.mkdir(outputFolder)
 
 for name in serverNames:
-    url = f"https://tgstation13.org/parsed-logs/{name}/data/logs/"
+    url = f"https://tgstation13.org/parsed-logs/{name}/data/logs"
     scrape(url, name)
