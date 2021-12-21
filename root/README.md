@@ -4,8 +4,15 @@
 
 ### [RawLogsScraper](RawLogsScraper.py)
 
-Not a whole lot to say here, this scrapes round and map information from the tgstation13.org public logs.
-There's a list of servers to pull from if you'd like to futz around with it. We don't actually have support for graphing by round right now, I'll add that later maybe.
+This scrapes round and map information from the tgstation13.org public logs.
+
+There's a list of servers to pull from if you'd like to futz around with it.
+
+It does some caching/buffering to prevent a runtime from causing bubbles in stored logs
+
+In the event of an error, this info can be found in [data/scraping.json](data/scraping.json)
+
+Also has some internal procs you can use to look at how many holes you have. No way to self heal if they happen before buffering was introduced though.
 
 Oh right uh, mood.json exists. Create one and edit it to match your server creds if for some reason you want to pull from raw logs (Don't forget to change the url)
 

@@ -7,7 +7,6 @@ It scrapes all available performance logs, processes them into csv files (One fo
 ## Scraping
 
 We don't scrape all performance logs, since some of them from before 2020/11/11 don't scrape well and don't match the current system.
-Uh if you stop the scraper midway it will just forget about those files, so... don't do that.
 
 ## Parsing
 
