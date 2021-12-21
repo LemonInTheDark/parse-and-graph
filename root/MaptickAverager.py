@@ -11,14 +11,20 @@ if not os.path.exists(output_loc):
     os.makedir(output_loc)
 
 output_to = f"{output_loc}maptick.csv"
-data_file = f"{output_loc}last_run.dat"
+
+data_file = "data/last_run.dat"
+old_data_file = f"{output_loc}last_run.dat"
 
 #Converts a log file into a dict
-def log_file_to_dict(file_path):
+def log_file_to_dict():
     write_to = {}
+    file_path = data_file
 
     if not os.path.exists(file_path):
-        return write_to
+        file_path = old_data_file
+        if not os.path.exists(file_path):
+            return write_to
+    
     #A data file holding info about the last "compile"
     #In the format Key:Data\n
     info_file = open(file_path, 'r') 
@@ -35,8 +41,10 @@ def log_file_to_dict(file_path):
     return write_to
 
 #Converts a log file into a dict, in the format described above
-def dict_to_log_file(file_path, dict):
+def dict_to_log_file(dict):
     write_string = ""
+    file_path = data_file
+    
     for key in dict:
         write_string += f"{key}:{dict[key]}\n"
     
@@ -166,7 +174,7 @@ data_log = {}
 tags_to_compare_with = ["backward_avg", "forward_avg", "backward_bound", "forward_bound", "starting_at", "highpass_threshold"]
 tags_to_leave_pure = tags_to_compare_with + ["last_round_fully_processed"]
 #A dict of information about the last run we did
-old_log = log_file_to_dict(data_file)
+old_log = log_file_to_dict()
 
 #Modify these tochange the size of the moving average
 movingbackward = 50
@@ -403,4 +411,4 @@ for index in data:
     output.write(write_to_file)
     output.close()
 
-dict_to_log_file(data_file, data_log)
+dict_to_log_file(data_log)

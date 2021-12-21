@@ -16,7 +16,7 @@ I'll be brief, but almost all aspects of this process are modifiable. Changing a
 
 Let's see, there's a short period of time where maptick logging failed, those rounds aren't parsed. That's why some graphs have a short hop in them
 
-Oh on that note, we don't fully process our files all at once, because frankly I'm doing all this in python to prove a point to myself, so if we did it would be slow as balls. Information about the last compile is stored in [compiled/last_run.dat](compiled/last_run.dat), if you want to poke around, or just delete it to trigger a full recompile. Anyway.
+Oh on that note, we don't fully process our files all at once, because frankly I'm doing all this in python to prove a point to myself, so if we did it would be slow as balls. Information about the last compile is stored in [data/last_run.dat](data/last_run.dat), if you want to poke around, or just delete it to trigger a full recompile. Anyway.
 
 - The size of our moving average: `movingbackward movingforward`
 - The size of moving minimum and maximum ranges: `boundbackward boundforward` (currently not graphed, do it yourself)
