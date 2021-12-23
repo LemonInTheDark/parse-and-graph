@@ -166,7 +166,7 @@ def scrape(url, serverName, fileBuffer, newestAllowed = 0):
         filename = entry["name"]
         newUrl = f"{url}/{filename}"
         if entry["type"] == "directory":
-            errorCode = scrape(newUrl, serverName, fileBuffer, newestAllowed)
+            errorCode = scrape(newUrl, serverName, fileBuffer, 0)
             if errorCode: #Propogate failure up the chain
                 return errorCode
             continue
@@ -183,7 +183,7 @@ def scrape(url, serverName, fileBuffer, newestAllowed = 0):
     if "round" in round_name:
         # Fully functional performance logging was merged on the 10th of November 2020, this prevents overshooting when taking the initial copy of the logs 
         current_id = round_name.split("-")[1] 
-        if int(current_id) <= target_round:  
+        if len(current_id.split(".")) > 2 or int(current_id) <= target_round:  
             return -1
 
 #Returns a list of dicts in the form {name, type (directory, file), mtime, size (for files)}
@@ -225,8 +225,12 @@ def roundAge(round):
     # If you're not a string (Not a round id) I'm not interested
     if round.isnumeric():
         return int(round)
-    
-    id = round.split("-")[1]
+
+    round_string = round.split("-")
+    if len(round_string) < 2:
+        return 0 
+
+    id = round_string[1]
     # If the server loses connection to the db for a period it will resort to ordering rounds by I think HH.MM.SS UTC
     # We can't use this, so just drop it  
     if not id.isnumeric():

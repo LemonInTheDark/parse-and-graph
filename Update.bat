@@ -10,3 +10,4 @@ py MaptickAverager.py
 echo Plotting Graphs
 gnuplot maptick_plot.gnuplot
 popd "%~dp0"
+pause
