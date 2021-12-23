@@ -261,6 +261,10 @@ for index in range(id_start_at, len(input)):
     map = properties[2] #The third item is the map name
     server = properties[3] #Fourth term's the server this round came from, we'll need that soon
 
+    if not id.isnumeric():
+        print("Found a non numeric round id, [id], skipping")
+        continue
+
     #There was a short period where we were parsing byond's maptick values incorrectly.
     #This lead to irrecovorably broken logs. This check exists to handle them
     #Let's try not to add any more yeah?
