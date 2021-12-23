@@ -227,6 +227,11 @@ def roundAge(round):
         return int(round)
     
     id = round.split("-")[1]
+    # If the server loses connection to the db for a period it will resort to ordering rounds by I think HH.MM.SS UTC
+    # We can't use this, so just drop it  
+    if not id.isnumeric():
+        print("[round] was not capable of being sanely converted into a number")
+        return 0
     # Lets make our id part of the number, but a fraction. Hopefully this makes things cleaner
     return float("0." + id)
 
