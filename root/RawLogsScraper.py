@@ -224,7 +224,7 @@ def readFile(url, name, serverName, fileBuffer):
 def roundAge(round):
     # If you're not a string (Not a round id) I'm not interested
     if round.isnumeric():
-        return age
+        return int(round)
     
     id = round.split("-")[1]
     # Lets make our id part of the number, but a fraction. Hopefully this makes things cleaner
