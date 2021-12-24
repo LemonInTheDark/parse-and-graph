@@ -1,4 +1,5 @@
 import glob
+import traceback
 import datetime
 import json
 import requests
@@ -31,6 +32,10 @@ outputFolder = "output/"
 
 # Metadata folder
 dataFolder = "data/"
+
+# Log folder
+logFolder = f"{dataFolder}logs/"
+
 # File to write the info about our currently scraped rounds into
 # Holds info in the form [server, target round, last stored round]
 dataFile = f"{dataFolder}scraping.json"
@@ -46,6 +51,10 @@ scraped_info = []
 # Our current "target" round. Typically ON_THE_MORNING_OF_THE_FIRST_DAY
 target_round = ON_THE_MORNING_OF_THE_FIRST_DAY
 
+# How many times to retry a query before giving up and failing
+
+retry_limit = 3
+
 # SETUP
 
 if not os.path.exists(outputFolder):
@@ -53,6 +62,9 @@ if not os.path.exists(outputFolder):
 
 if not os.path.exists(dataFolder):
     os.mkdir(dataFolder)
+
+if not os.path.exists(logFolder):
+    os.mkdir(logFolder)
 
 if not os.path.exists(dataFile):
     file = open(dataFile, 'w')
@@ -63,6 +75,22 @@ deets = readFile.read()
 if len(deets):
     scraped_info = json.loads(deets)
 readFile.close()
+
+
+class ScrapingError(Exception):
+    pass
+
+class CommunicationBreakdownError(ScrapingError):
+    """Exception raised when networking calls fail.
+
+    Attributes:
+        expression -- input expression in which the error occurred
+        message -- explanation of the error
+    """
+
+    def __init__(self, expression, message):
+        self.expression = expression
+        self.message = message
 
 class Buffer:
 
@@ -141,11 +169,14 @@ def clearDataFile():
 #do_not_post_this_4head.close()
 
 def get_url(requestTarget) :
-    response = requests.get(requestTarget, headers = fakingIdentity)
-    if response.status_code != 200: #If we time out don't spawm mso too hard
-        print(f"A raw request failed to return 200 OK, instead returning [{str(response.status_code)}]. stopping investigation")
-        return
-    return response
+    for i in range(1, retry_limit):
+        response = requests.get(requestTarget, headers = fakingIdentity)
+        if response.status_code != 200: #If we time out don't spawm mso too hard
+            print(f"A raw request failed to return 200 OK, instead returning [{str(response.status_code)}]")
+            continue
+        return response
+    print("Failed too many times, stopping execution")
+    raise CommunicationBreakdownError
 
 def scrape(url, serverName, fileBuffer, newestAllowed = 0):
     if not fileBuffer:
@@ -183,7 +214,7 @@ def scrape(url, serverName, fileBuffer, newestAllowed = 0):
     if "round" in round_name:
         # Fully functional performance logging was merged on the 10th of November 2020, this prevents overshooting when taking the initial copy of the logs 
         current_id = round_name.split("-")[1] 
-        if int(current_id) <= target_round:  
+        if current_id.isnumeric() and int(current_id) <= target_round:  
             return -1
 
 #Returns a list of dicts in the form {name, type (directory, file), mtime, size (for files)}
@@ -230,7 +261,7 @@ def roundAge(round):
     # If the server loses connection to the db for a period it will resort to ordering rounds by I think HH.MM.SS UTC
     # We can't use this, so just drop it  
     if not id.isnumeric():
-        print("[round] was not capable of being sanely converted into a number")
+        print(f"[round] was not capable of being sanely converted into a number")
         return 0
     # Lets make our id part of the number, but a fraction. Hopefully this makes things cleaner
     return float("0." + id)
@@ -254,8 +285,13 @@ def urlAge(url):
     # No actual age? end it lads
     if not age:
         return age
+    
+    # https://tgstation13.org/parsed-logs/manuel/data/logs/2021/12/09/round-174460
+    # 1 2 3 4 5 6 7 8 9 10 /s, so we take the 10th section, if it exists
+    if len(portions) < 11:
+        return age
 
-    return age + roundAge(portions[-1])
+    return age + roundAge(portions[10])
 
 # Finds pockets of unpulled rounds
 def findPockets():
@@ -330,4 +366,10 @@ def standard():
     healPockets()
     pullNew()
 
-standard()
+try:
+    standard()
+except:
+    time = datetime.datetime.now().timestamp()
+    file = open(f"{logFolder}{time}.log", "w")
+    file.write(traceback.format_exc())
+    file.close()
