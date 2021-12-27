@@ -15,6 +15,10 @@ output_to = f"{output_loc}maptick.csv"
 data_file = "data/last_run.dat"
 old_data_file = f"{output_loc}last_run.dat"
 
+#converts a float input measured in seconds to one in microseconds
+def to_microseconds(value):
+    return value * 1000 * 1000
+
 #Converts a log file into a dict
 def log_file_to_dict():
     write_to = {}
@@ -207,7 +211,7 @@ data_log["starting_at"] = head_rnd
 highpass = 2.5 #Cuts out the pain stuff while still allowing the carpet bump to remain clear
 data_log["highpass_threshold"] = highpass
 
-keys_to_average = ["maptick_to_player", "maptick", "players", "td", "td_to_player"]
+keys_to_average = ["maptick_to_player", "maptick", "players", "td", "td_to_player", "sendmaps_cost_per_tick", "per_client", "look_for_movable_changes", "check_turf_vis_conts", "check_hud/image_vis_contents", "turfs_in_range", "obj_changes", "mob_changes", "movables_examined"]
 
 input = glob.glob("output/*.csv")
 
@@ -233,7 +237,8 @@ fieldnames = ["id"] + fieldnames
 maps_we_care_about = ["Delta%20Station", "Ice%20Box%20Station", "Kilo%20Station", "MetaStation", "Tramstation"]
 
 data = {} #Dictionary of file names to dictionaries of data to be written later.
- 
+
+# first pass of data parsing: populate the data dictionary with info
 # for all round ids we've not ingested before
 for index in range(id_start_at, len(input)):
     f_name = input[index]
@@ -241,6 +246,34 @@ for index in range(id_start_at, len(input)):
     maptick_total = 0
     player_total = 0
     td_total = 0
+
+    sendmaps_total_cost = 0 #all of these only use the last rows data which is the real total for that round
+    sendmaps_total_calls = 0
+
+    sendmaps_client_cost = 0
+    sendmaps_client_calls = 0
+
+    movable_changes_cost = 0
+    movable_changes_calls = 0
+
+    check_turf_vis_contents_cost = 0
+    check_turf_vis_contents_calls = 0
+
+    check_hud_image_vis_contents_cost = 0
+    check_hud_image_vis_contents_calls = 0
+
+    loop_turfs_in_range_cost = 0
+    loop_turfs_in_range_calls = 0
+
+    obj_changes_cost = 0
+    obj_changes_calls = 0
+
+    mob_changes_cost = 0
+    mob_changes_calls = 0
+
+    movables_examined = 0
+
+    has_sendmaps_profiler_logs = False
 
     csvfile = open(f_name, newline='')
     reader = csv.DictReader(csvfile)
@@ -250,6 +283,35 @@ for index in range(id_start_at, len(input)):
         maptick_total += float(row["maptick"])
         player_total += float(row["players"])
         td_total += float(row["tidi_avg"]) 
+
+        sendmaps_total_cost = float(row.get("send_maps") or 0)#the last row read is the final value for these
+        sendmaps_total_calls = float(row.get("send_maps_count") or 0)#have to use .get(index) or 0 because not all logs have these indices
+        if sendmaps_total_cost != 0.0:
+            has_sendmaps_profiler_logs = True
+
+        sendmaps_client_cost = float(row.get("per_client") or 0)
+        sendmaps_client_calls = float(row.get("per_client_count") or 0)
+
+        movable_changes_cost = float(row.get("look_for_movable_changes") or 0)
+        movable_changes_calls = float(row.get("look_for_movable_changes_count") or 0)
+
+        check_turf_vis_contents_cost = float(row.get("check_turf_vis_conts") or 0)
+        check_turf_vis_contents_calls = float(row.get("check_turf_vis_conts_count") or 0)
+
+        check_hud_image_vis_contents_cost = float(row.get("check_hud/image_vis_contents") or 0)
+        check_hud_image_vis_contents_calls = float(row.get("check_hud/image_vis_contents_count") or 0)
+
+        loop_turfs_in_range_cost = float(row.get("turfs_in_range") or 0)
+        loop_turfs_in_range_calls = float(row.get("turfs_in_range_count") or 0)
+
+        obj_changes_cost = float(row.get("obj_changes") or 0)
+        obj_changes_calls = float(row.get("obj_changes_count") or 0)
+
+        mob_changes_cost = float(row.get("mob_changes") or 0)
+        mob_changes_calls = float(row.get("mob_changes_count") or 0)
+
+        movables_examined = float(row.get("movables_examined") or 0)
+
     csvfile.close()
 
     #In the template perf-[roundid]-[mapname]-[servername].csv
@@ -277,6 +339,55 @@ for index in range(id_start_at, len(input)):
     avg_maptick = 0
     avg_players = 0
     avg_td = 0
+
+    sendmaps_cost_per_tick = 0 #absolute cost values: either milliseconds, microseconds, or total movables examined
+    sendmaps_clients = 0
+    avg_cost_per_client = 0
+    avg_cost_movable_changes = 0
+    avg_cost_turf_vis_contents = 0
+    avg_cost_hud_image_vis_contents = 0
+    avg_cost_turfs_in_range = 0
+    avg_cost_obj_changes = 0
+    avg_cost_mob_changes = 0
+    avg_movables_examined = 0
+
+    look_for_movable_changes_percent = 0 #relative cost percentage values: percentage of sendmaps total cost
+    turf_vis_contents_percent = 0
+    hud_image_vis_contents_percent = 0
+    loop_turfs_in_range_percent = 0
+    send_obj_changes_percent = 0
+    send_mob_changes_percent = 0
+
+    if has_sendmaps_profiler_logs:
+        #the cost vars are always in seconds which makes most of them very small. converting to microseconds is much better
+        sendmaps_cost_per_tick = to_microseconds(sendmaps_total_cost / sendmaps_total_calls)
+        sendmaps_clients = sendmaps_client_calls / sendmaps_total_calls 
+
+        if sendmaps_client_calls:
+            avg_cost_per_client = to_microseconds(sendmaps_total_cost / sendmaps_client_calls)
+        if movable_changes_calls:
+            avg_cost_movable_changes = to_microseconds(movable_changes_cost / movable_changes_calls)
+        if check_turf_vis_contents_calls:
+            avg_cost_turf_vis_contents = to_microseconds(check_turf_vis_contents_cost / check_turf_vis_contents_calls)
+        if check_hud_image_vis_contents_calls:
+            avg_cost_hud_image_vis_contents = to_microseconds(check_hud_image_vis_contents_cost / check_hud_image_vis_contents_calls)
+        if loop_turfs_in_range_calls:
+            avg_cost_turfs_in_range = to_microseconds(loop_turfs_in_range_cost / loop_turfs_in_range_calls)
+        if obj_changes_calls:
+            avg_cost_obj_changes = to_microseconds(obj_changes_cost / obj_changes_calls)
+        if mob_changes_calls:
+            avg_cost_mob_changes = to_microseconds(mob_changes_cost / mob_changes_calls)
+        if sendmaps_client_calls:
+            avg_movables_examined = movables_examined / sendmaps_client_calls
+
+        if sendmaps_total_cost:
+            look_for_movable_changes_percent = 100 * movable_changes_cost / sendmaps_total_cost
+            turf_vis_contents_percent = 100 * check_turf_vis_contents_cost / sendmaps_total_cost
+            hud_image_vis_contents_percent = 100 * check_hud_image_vis_contents_cost / sendmaps_total_cost
+            loop_turfs_in_range_percent = 100 * loop_turfs_in_range_cost / sendmaps_total_cost
+            send_obj_changes_percent = 100 * obj_changes_cost / sendmaps_total_cost
+            send_mob_changes_percent = 100 * mob_changes_cost / sendmaps_total_cost
+
     if player_total:
         maptick_by_players = maptick_total / player_total
         td_by_players = td_total / player_total
@@ -285,7 +396,7 @@ for index in range(id_start_at, len(input)):
         avg_players = player_total / lines_read
         avg_td = td_total / lines_read
 
-    #I'm sorry
+    #finalize our data collection by map, server, and generic single stat files
     pending = [map, server, "maptick", "highpass_maptick"]
     for index in pending:
         if index not in data: #If one doesn't already exist, make a new list to put our map data into
@@ -299,9 +410,21 @@ for index in range(id_start_at, len(input)):
         to_write["maptick"] = avg_maptick
         to_write["players"] = avg_players 
         to_write["td"] = avg_td
+
         if td_by_players > 1.2:
             td_by_players = 0.6
         to_write["td_to_player"] = td_by_players
+
+        to_write["sendmaps_cost_per_tick"] = sendmaps_cost_per_tick
+        to_write["per_client"] = avg_cost_per_client
+        to_write["look_for_movable_changes"] = avg_cost_movable_changes
+        to_write["check_turf_vis_conts"] = avg_cost_turf_vis_contents
+        to_write["check_hud/image_vis_contents"] = avg_cost_hud_image_vis_contents
+        to_write["turfs_in_range"] = avg_cost_turfs_in_range
+        to_write["obj_changes"] = avg_cost_obj_changes
+        to_write["mob_changes"] = avg_cost_mob_changes
+        to_write["movables_examined"] = avg_movables_examined
+
         data[index].append(to_write)
 
     print(f"Read [{id}] [{map}] [{server}]")
