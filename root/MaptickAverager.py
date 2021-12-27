@@ -351,13 +351,6 @@ for index in range(id_start_at, len(input)):
     avg_cost_mob_changes = 0
     avg_movables_examined = 0
 
-    look_for_movable_changes_percent = 0 #relative cost percentage values: percentage of sendmaps total cost
-    turf_vis_contents_percent = 0
-    hud_image_vis_contents_percent = 0
-    loop_turfs_in_range_percent = 0
-    send_obj_changes_percent = 0
-    send_mob_changes_percent = 0
-
     if has_sendmaps_profiler_logs:
         #the cost vars are always in seconds which makes most of them very small. converting to microseconds is much better
         sendmaps_cost_per_tick = to_microseconds(sendmaps_total_cost / sendmaps_total_calls)
@@ -379,14 +372,6 @@ for index in range(id_start_at, len(input)):
             avg_cost_mob_changes = to_microseconds(mob_changes_cost / mob_changes_calls)
         if sendmaps_client_calls:
             avg_movables_examined = movables_examined / sendmaps_client_calls
-
-        if sendmaps_total_cost:
-            look_for_movable_changes_percent = 100 * movable_changes_cost / sendmaps_total_cost
-            turf_vis_contents_percent = 100 * check_turf_vis_contents_cost / sendmaps_total_cost
-            hud_image_vis_contents_percent = 100 * check_hud_image_vis_contents_cost / sendmaps_total_cost
-            loop_turfs_in_range_percent = 100 * loop_turfs_in_range_cost / sendmaps_total_cost
-            send_obj_changes_percent = 100 * obj_changes_cost / sendmaps_total_cost
-            send_mob_changes_percent = 100 * mob_changes_cost / sendmaps_total_cost
 
     if player_total:
         maptick_by_players = maptick_total / player_total

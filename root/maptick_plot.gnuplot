@@ -119,10 +119,11 @@ set title "TD"
 plot inputfile using 1:5 with lines title "TD"
 
 set ylabel 'Microseconds'
+set xrange [163000:]
 
 set output outputfile13
 set title "Average Costs"
-plot inputfile using 1:34 with lines, '' using 1:37 with lines, '' using 1:40 with lines, '' using 1:43 with lines, '' using 1:46 with lines, '' using 1:49 with lines, '' using 1:52 with lines, '' using 1:55 with lines
+plot inputfile using 1:34 with lines, '' using 1:37 with lines, '' using 1:40 with lines, '' using 1:43 with lines, '' using 1:46 with lines, '' using 1:49 with lines, '' using 1:52 with lines#, '' using 1:55 with lines
 
 set ylabel "Count"
 
