@@ -33,7 +33,6 @@ filename = sprintf("%s%s", outputfolder, filename)
 outputfile13 = sprintf("%s Average%s", filename, outputformat)
 outputfile14 = sprintf("%s Average By Map%s", filename, outputformat)
 outputfile15 = sprintf("%s Average By Server%s", filename, outputformat)
-#outputfile16 = sprintf("%s Average%s", filename, outputformat)
 
 set key autotitle columnheader 
 set key noenhanced

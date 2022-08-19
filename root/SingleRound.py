@@ -3,10 +3,6 @@ import glob
 import sys
 import subprocess
 import os.path
-
-#output_loc = "maptick/"
-#if not os.path.exists(output_loc):
-#    os.makedir(output_loc)
     
 output_to = "single_round/temporary"
 read_from = "output/"
