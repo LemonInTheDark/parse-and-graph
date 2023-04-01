@@ -15,7 +15,7 @@ sendmaps_grunge = []
 for name in sendmaps_starting:
     sendmaps_grunge += [name + "_count"]
 
-fieldnames = ["time", "players", "maptick", "tidi_avg"]
+fieldnames = ["time", "players", "maptick", "tidi_avg", "num_timers", "air_turf_cost", "air_eg_cost", "air_highpressure_cost"]
 
 path = ""
 if len(sys.argv) > 1:

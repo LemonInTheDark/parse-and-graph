@@ -11,16 +11,17 @@ if(!exists("foldername")) foldername = sprintf("%u", time(0))
 command = "mkdir ".foldername
 system command
 
-if(!exists("outputfilename")) outputfilename = "Misc Maptick Numbers #"
+if(!exists("outputfilename")) outputfilename = "Sendmaps "
 
 filename = sprintf("%s/%s", foldername, outputfilename)
 
 outputfile1 = sprintf("%s/Classic Stats%s", foldername, outputformat)
-outputfile2 = sprintf("%s1%s", filename, outputformat)
-outputfile3 = sprintf("%s2%s", filename, outputformat)
-outputfile4 = sprintf("%s3%s", filename, outputformat)
-outputfile5 = sprintf("%s4%s", filename, outputformat)
-outputfile6 = sprintf("%s5%s", filename, outputformat)
+outputfile2 = sprintf("%sEverything%s", filename, outputformat)
+outputfile3 = sprintf("%sGlobal%s", filename, outputformat)
+outputfile4 = sprintf("%sPer Client%s", filename, outputformat)
+outputfile5 = sprintf("%sMap Data%s", filename, outputformat)
+outputfile6 = sprintf("%sMovable Changes%s", filename, outputformat)
+outputfile7 = sprintf("%sAtmos%s", filename, outputformat)
 
 set title "Deep Profiling"
 set key autotitle columnheader 
@@ -43,21 +44,25 @@ set size ratio 0.85
 set ylabel 'Change Per Second'
 
 set output outputfile2
-set title "Complex Shit 1"
-plot inputfile using 1:28 with lines, '' using 1:29 with lines, '' using 1:30 with lines, '' using 1:31 with lines, '' using 1:32 with lines, '' using 1:33 with lines, '' using 1:34 with lines, '' using 1:35 with lines, '' using 1:36 with lines, '' using 1:37 with lines, '' using 1:38 with lines, '' using 1:39 with lines, '' using 1:40 with lines, '' using 1:41 with lines, '' using 1:42 with lines, '' using 1:43 with lines, '' using 1:44 with lines, '' using 1:45 with lines, '' using 1:46 with lines, '' using 1:47 with lines, '' using 1:48 with lines, '' using 1:49 with lines
+set title "Everything SendMaps"
+plot inputfile using 1:32 with lines, '' using 1:33 with lines, '' using 1:34 with lines, '' using 1:35 with lines, '' using 1:36 with lines, '' using 1:37 with lines, '' using 1:38 with lines, '' using 1:39 with lines, '' using 1:40 with lines, '' using 1:41 with lines, '' using 1:42 with lines, '' using 1:43 with lines, '' using 1:44 with lines, '' using 1:45 with lines, '' using 1:46 with lines, '' using 1:47 with lines, '' using 1:48 with lines, '' using 1:49 with lines, '' using 1:50 with lines, '' using 1:51 with lines, '' using 1:52 with lines, '' using 1:53 with lines
 
 set output outputfile3
-set title "Complex Shit 2"
-plot inputfile using 1:28 with lines, '' using 1:34 with lines, '' using 1:35 with lines, '' using 1:36 with lines, '' using 1:37 with lines, '' using 1:38 with lines
+set title "SendMaps Global"
+plot inputfile using 1:32 with lines, '' using 1:34 with lines, '' using 1:35 with lines, '' using 1:36 with lines
 
 set output outputfile4
-set title "Complex Shit 3"
-plot inputfile using 1:28 with lines, '' using 1:39 with lines, '' using 1:40 with lines, '' using 1:41 with lines, '' using 1:42 with lines, '' using 1:43 with lines
+set title "SendMaps Per Client"
+plot inputfile using 1:36 with lines, '' using 1:37 with lines, '' using 1:38 with lines, '' using 1:39 with lines, '' using 1:40 with lines
 
 set output outputfile5
-set title "Complex Shit 4"
-plot inputfile using 1:28 with lines, '' using 1:44 with lines, '' using 1:45 with lines, '' using 1:46 with lines, '' using 1:47 with lines, '' using 1:48 with lines
+set title "SendMaps Map Data"
+plot inputfile using 1:40 with lines, '' using 1:41 with lines, '' using 1:42 with lines, '' using 1:43 with lines, '' using 1:44 with lines, '' using 1:45 with lines, '' using 1:46 with lines, '' using 1:47 with lines, '' using 1:48 with lines, '' using 1:49 with lines, '' using 1:50 with lines
 
 set output outputfile6
-set title "Complex Shit 5"
-plot inputfile using 1:28 with lines, '' using 1:49 with lines
+set title "SendMaps Movable Changes"
+plot inputfile using 1:52 with lines, '' using 1:51 with lines, '' using 1:52 with lines, '' using 1:53 with lines
+
+set output outputfile7
+set title "Atmos Subprocesses"
+plot inputfile using 1:6 with lines, '' using 1:7 with lines, '' using 1:8 with lines
