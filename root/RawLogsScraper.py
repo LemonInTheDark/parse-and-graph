@@ -7,7 +7,7 @@ import os.path
 
 #Example inputs for the headers to pack with the request. Put yours in a dictonary in cookie_file
 fakingIdentity = {
-    "Host": "tgstation13.org",
+    "Host": "tgstation13.download",
     "User-Agent": "Default Graphing Scraper (Lemon Scented)",
     "Accept": "Remember to not accept zip files",
     "Accept-Language": "hhhhhhhhhhh",
@@ -286,7 +286,7 @@ def urlAge(url):
     if not age:
         return age
     
-    # https://tgstation13.org/parsed-logs/manuel/data/logs/2021/12/09/round-174460
+    # https://tgstation13.download/parsed-logs/manuel/data/logs/2021/12/09/round-174460
     # 1 2 3 4 5 6 7 8 9 10 /s, so we take the 10th section, if it exists
     if len(portions) < 11:
         return age
@@ -340,7 +340,7 @@ def healPockets():
         # Gets our url's age
         age = urlAge(lastUrl)
 
-        url = f"https://tgstation13.org/parsed-logs/{server}/data/logs"
+        url = f"https://tgstation13.download/parsed-logs/{server}/data/logs"
         buffer = Buffer(bufferSize, server, lastUrl)
         
 
@@ -353,7 +353,7 @@ def healPockets():
 
 def pullNew():
     for name in serverNames:
-        url = f"https://tgstation13.org/parsed-logs/{name}/data/logs"
+        url = f"https://tgstation13.download/parsed-logs/{name}/data/logs"
         buffer = Buffer(bufferSize, name)
         
         scrape(url, name, buffer)
