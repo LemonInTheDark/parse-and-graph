@@ -3,8 +3,6 @@ import glob
 import os
 import os.path
 import sys
-import enum
-from enum import auto
 
 MAX = sys.float_info.max
 
@@ -297,7 +295,6 @@ for index in range(id_start_at, len(input)):
     sendmaps_total_calls = get_value(last_row, "send_maps_count")
     if sendmaps_total_cost != 0.0:
         has_sendmaps_profiler_logs = True
-        print("has_sendmaps_profiler_logs = True")
 
     sendmaps_client_cost = get_value(last_row, "per_client")
     sendmaps_client_calls = get_value(last_row, "per_client_count")
