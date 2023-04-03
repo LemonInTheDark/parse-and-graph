@@ -95,6 +95,7 @@ class CommunicationBreakdownError(ScrapingError):
 class Buffer:
 
     def __init__(self, size, server, lastUrl = ""):
+        #how many files we can hold in our buffer before we have to write them all to data buffers
         self.size = size
         # List of [url, fileName, text]s
         self.fileBuffer = []
@@ -103,6 +104,7 @@ class Buffer:
         # Our last saved url
         self.previousUrl = lastUrl
 
+    #write every data file we have in our buffer to a data file in the output folder
     def dumpBuffer(self):
         if len(self.fileBuffer) == 0:
             return
@@ -127,6 +129,7 @@ class Buffer:
             return
         self.dumpBuffer()
 
+#writes to the lastrun.dat file to store info on the current scraping run
 def writeDataFile(server, roundUrl, previousUrl):
     master_info = scraped_info
     
@@ -168,6 +171,7 @@ def clearDataFile():
 #fakingIdentity = json.load(do_not_post_this_4head) #Loads a .json file containing the cookie and other params to send to mso
 #do_not_post_this_4head.close()
 
+#return the file located at the given url if possible
 def get_url(requestTarget) :
     for i in range(1, retry_limit):
         response = requests.get(requestTarget, headers = fakingIdentity)
@@ -236,7 +240,7 @@ def listFD(url):
     #return [node.get('href') for node in soup.find_all('a')]
 
 def readFile(url, name, serverName, fileBuffer):
-    response = get_url(url)
+    targeted_file = get_url(url)
     name = name.rstrip('.gz')
     name_parts = name.split(".")
     name_parts[0] += f"-{serverName}"
@@ -244,13 +248,13 @@ def readFile(url, name, serverName, fileBuffer):
     filename = outputFolder + name
 
     #The exists check prevents overscanning, if you fuck something up comment it out 
-    if not response: 
+    if not targeted_file: 
         return -1
     
     if os.path.exists(filename):
         return -1
     
-    fileBuffer.writeToBuffer(url, filename, response.text)
+    fileBuffer.writeToBuffer(url, filename, targeted_file.text)
 
 def roundAge(round):
     # If you're not a string (Not a round id) I'm not interested

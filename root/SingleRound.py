@@ -3,15 +3,11 @@ import glob
 import sys
 import subprocess
 import os.path
-
-#output_loc = "maptick/"
-#if not os.path.exists(output_loc):
-#    os.makedir(output_loc)
     
 output_to = "single_round/temporary"
 read_from = "output/"
 sendmaps_starting = ["send_maps", "initial_house", "cleanup", "client_loop", "per_client", "deleted_images", "hud_update", "statpanel_update", "map_data", "check_eye_pos", "update_chunks", "turfmap_updates", "changed_turfs", "turf_chunk_info", "obj_changes", "mob_changes", "send_turf_vis_conts", "pending_animations", "look_for_movable_changes", "check_turf_vis_conts", "check_hud/image_vis_contents", "turfs_in_range", "movables_examined"]
-sendmaps_grunge = []
+sendmaps_grunge = []#like above but everything ends in _count. theyre just # of calls for that thing
 for name in sendmaps_starting:
     sendmaps_grunge += [name + "_count"]
 
@@ -36,7 +32,7 @@ csvfile = open(f_name, newline='')
 reader = csv.DictReader(csvfile)
 
 output = open(f"{output_to}.csv", 'w')
-writer = csv.DictWriter(output, fieldnames=fieldnames+sendmaps_grunge+sendmaps_starting)
+writer = csv.DictWriter(output, fieldnames=fieldnames + sendmaps_grunge + sendmaps_starting)
 writer.writeheader()
 
 for row in reader:
