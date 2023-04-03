@@ -90,9 +90,6 @@ def copy_dict_into_dict(copy_from, copy_into, keys_to_ignore):
             continue
         copy_into[key] = copy_from[key]
 
-# Modified binary search. check_function returns 1 if the first index is "larger" then the second, -1 if it's smaller, and 0 if they're the same
-
-
 def round_binary_search(arr, look_for):
     look_for = int(look_for)
     low = 0
@@ -264,103 +261,6 @@ maps_we_care_about = ["Delta%20Station", "Ice%20Box%20Station",
 # Dictionary of file names to dictionaries of data to be written later.
 data = {}
 
-# most processed stats are averages of two values, this just makes it easier to define
-
-
-def PROCESSED_STAT_AVERAGE(numerator, denominator, scaling_func): return [
-    numerator, denominator, scaling_func] if scaling_func else [numerator, denominator]
-
-# scaling_func = additional function to call on the fraction to scale it before returning
-
-
-def avg(numerator, denominator, scaling_func=to_microseconds):
-    if(denominator > 0):
-        return scaling_func(numerator / denominator)
-    else:
-        return 0
-
-class StatToken(enum.Enum):
-    USE_PREVIOUS_SIMPLE_STAGE = auto()
-    SELF = auto()
-
-# holder for data used to determine what stats to grab from the raw files and what to do with that data afterwards.
-# these dont actually do work themselves, they're just a helpful way to define a pipeline of raw data to processed statistics.
-# the actual work is done via lists / dictionaries created to hold the stats defined in instances of this class (and subtypes)
-class TrackedStat:
-    name = ""
-
-    # FIRST STAGE STATS (reading directly from rows, all defined stats at this stage go into first_stage_stats)
-
-    # the names of the stats we read from each row, each of these will be added to a cumulative value
-    # list of the form: [string exactly matching a stat grabbed from the row]
-    cumulative_raw_stats = []
-
-    # like cumulative_raw_stats, but they arent just added to with the value from each row, you can define how the stored value is changed with each read pass
-    # dictionary of the form: {string exactly matching a stat grabbed from the row : function reference to call each pass}
-    # you probably dont need this, it slows down reading
-    special_raw_stats = {}
-
-    # SECOND STAGE STATS (iterating over first stage stats, all defined stats at this stage go into second_stage_stats)
-
-    # stats that are averaged from two first stage stats
-    # dictionary of the form: {processed stat name (string) : [numerator stat read from rows, denominator stat read from rows, scaling function if not to_microseconds]}
-    # most second stage stats go in here
-    averaged_stats = {}
-
-    # like averaged_stats except you can define other functions to use
-    # dictionary of the form: {processed stat name (string) : [function to call to give this stat its value, additional arguments to give to that function]}
-    # if the arguments to give to the function are strings that match an existing stat name, the value associated with that stat is put in its place.
-    special_processed_stats = {}
-
-    # THIRD STAGE STATS (writing second and/or first stage stats to a file)
-
-    # dictionary of the form: {stat name string that gets written into the file : first or second stage stat to use}
-    write_stats = {}
-
-    # FOURTH AND FINAL STAGE STATS (averaging across rounds)
-
-    # values to average across rounds
-    cross_round_averaged_stats = []
-
-    # internal var used for linking to previous stages in instance declarations
-    _prev_stage_indices = [0, 0, 0, 0]
-
-    def __init__(self, 
-                name = "", 
-                cumulative_raw_stats = [], 
-                special_raw_stats = {}, 
-                averaged_stats = [], 
-                special_processed_stats = {}, 
-                write_stats = {}, 
-                cross_round_averaged_stats = []):
-
-        self.name = name
-        self.cumulative_raw_stats = cumulative_raw_stats
-        self.special_raw_stats = special_raw_stats
-
-        for key in averaged_stats:
-            for i in range(0, len(averaged_stats[key]) - 1):
-                argument = averaged_stats[key][i]
-                if argument == StatToken.SELF: 
-                    averaged_stats[key][i] = key
-
-        self.averaged_stats = averaged_stats
-        self.special_processed_stats = special_processed_stats
-
-        for key in write_stats:
-            if write_stats[key] == StatToken.SELF:
-                write_stats[key] = key
-                
-        self.write_stats = write_stats
-        self.cross_round_averaged_stats = cross_round_averaged_stats
-
-sendmaps_total = TrackedStat(
-    name="sendmaps_total",
-    cumulative_raw_stats=["sendmaps_total_cost", "sendmaps_total_calls"],
-    averaged_stats={"sendmaps_cost_per_tick": ["sendmaps_total_cost", "sendmaps_total_calls"]},
-    write_stats={"sendmaps_cost_per_tick" : StatToken.SELF}, #associating it with Self makes __init__() associate the value with the key
-    cross_round_averaged_stats=["sendmaps_cost_per_tick"])
-
 # first pass of data parsing: populate the data dictionary with info
 # for all round ids we've not ingested before
 for index in range(id_start_at, len(input)):
@@ -370,90 +270,57 @@ for index in range(id_start_at, len(input)):
     player_total = 0
     td_total = 0
 
-    stats = {}
-
-    cumulative_raw_stats = []
-    special_raw_stats = {}
-
-    first_stage_stats = {}
-
-    # all of these only use the last rows data which is the real total for that round
-    stats["sendmaps_total_cost"] = 0
-    stats["sendmaps_total_calls"] = 0
-
-    stats["sendmaps_client_cost"] = 0
-    stats["sendmaps_client_calls"] = 0
-
-    stats["movable_changes_cost"] = 0
-    stats["movable_changes_calls"] = 0
-
-    stats["check_turf_vis_contents_cost"] = 0
-    stats["check_turf_vis_contents_calls"] = 0
-
-    stats["check_hud_image_vis_contents_cost"] = 0
-    stats["check_hud_image_vis_contents_calls"] = 0
-
-    stats["loop_turfs_in_range_cost"] = 0
-    stats["loop_turfs_in_range_calls"] = 0
-
-    stats["obj_changes_cost"] = 0
-    stats["obj_changes_calls"] = 0
-
-    stats["mob_changes_cost"] = 0
-    stats["mob_changes_calls"] = 0
-
-    stats["movables_examined"] = 0
-
     has_sendmaps_profiler_logs = False
 
     csvfile = open(f_name, newline='')
     reader = csv.DictReader(csvfile)
 
-    get_row = lambda row, row_stat, null_val=0: float(row.get(row_stat) or null_val)
+    #raw_rows = csvfile.readlines()
+    #rows_with_fields = dict(zip(reader.fieldnames, raw_rows))
+
+    get_value = lambda row, row_stat, null_val=0: float(row.get(row_stat) or null_val) if row != None else null_val
+
+    last_row = None
 
     # read all the data
     for row in reader:
         lines_read += 1
-        for stat_to_add in cumulative_raw_stats:
-            first_stage_stats[stat_to_add] = get_row(row, stat_to_add)
+        last_row = row.copy()
 
-        for special_stat in special_raw_stats:
-            func = special_raw_stats[special_stat]
-            first_stage_stats[special_stat] = func(get_row(row, special_stat), first_stage_stats[special_stat])
+        maptick_total += get_value(row, "maptick")
+        player_total += get_value(row, "players")
+        td_total += get_value(row, "tidi_avg")
 
-        maptick_total += get_row(row, "maptick")
-        player_total += float(row["players"])
-        td_total += float(row["tidi_avg"])
+    # the last row read is the final value for these
+    sendmaps_total_cost = get_value(last_row, "send_maps")
+    # have to use .get(index) or 0 because not all logs have these indices
+    sendmaps_total_calls = get_value(last_row, "send_maps_count")
+    if sendmaps_total_cost != 0.0:
+        has_sendmaps_profiler_logs = True
+        print("has_sendmaps_profiler_logs = True")
 
-        # the last row read is the final value for these
-        sendmaps_total_cost = float(row.get("send_maps") or 0)
-        # have to use .get(index) or 0 because not all logs have these indices
-        sendmaps_total_calls = float(row.get("send_maps_count") or 0)
-        if sendmaps_total_cost != 0.0:
-            has_sendmaps_profiler_logs = True
+    sendmaps_client_cost = get_value(last_row, "per_client")
+    sendmaps_client_calls = get_value(last_row, "per_client_count")
 
-        sendmaps_client_cost = float(row.get("per_client") or 0)
-        sendmaps_client_calls = float(row.get("per_client_count") or 0)
+    movable_changes_cost = get_value(last_row, "look_for_movable_changes")
+    movable_changes_calls = get_value(last_row, "look_for_movable_changes_count")
 
-        movable_changes_cost = float(row.get("look_for_movable_changes") or 0)
-        movable_changes_calls = float(row.get("look_for_movable_changes_count") or 0)
+    check_turf_vis_contents_cost = get_value(last_row, "check_turf_vis_conts")
+    check_turf_vis_contents_calls = get_value(last_row, "check_turf_vis_conts_count")
 
-        check_turf_vis_contents_cost = float(row.get("check_turf_vis_conts") or 0)
-        check_turf_vis_contents_calls = float(row.get("check_turf_vis_conts_count") or 0)
+    check_hud_image_vis_contents_cost = get_value(last_row, "check_hud/image_vis_contents")
+    check_hud_image_vis_contents_calls = get_value(last_row, "check_hud/image_vis_contents_count")
 
-        check_hud_image_vis_contents_cost = float(row.get("check_hud/image_vis_contents") or 0)
-        check_hud_image_vis_contents_calls = float(row.get("check_hud/image_vis_contents_count") or 0)
+    loop_turfs_in_range_cost = get_value(last_row, "turfs_in_range")
+    loop_turfs_in_range_calls = get_value(last_row, "turfs_in_range_count")
 
-        loop_turfs_in_range_cost = float(row.get("turfs_in_range") or 0)
-        loop_turfs_in_range_calls = float(row.get("turfs_in_range_count") or 0)
+    obj_changes_cost = get_value(last_row, "obj_changes")
+    obj_changes_calls = get_value(last_row, "obj_changes_count")
 
-        obj_changes_cost = float(row.get("obj_changes") or 0)
-        obj_changes_calls = float(row.get("obj_changes_count") or 0)
+    mob_changes_cost = get_value(last_row, "mob_changes")
+    mob_changes_calls = get_value(last_row, "mob_changes_count")
 
-        mob_changes_cost = float(row.get("mob_changes") or 0)
-        mob_changes_calls = float(row.get("mob_changes_count") or 0)
-
-        movables_examined = float(row.get("movables_examined") or 0)
+    movables_examined = get_value(last_row, "movables_examined")
 
     csvfile.close()
 
@@ -479,90 +346,43 @@ for index in range(id_start_at, len(input)):
     if intid >= 164722 and intid <= 164824:
         continue
 
-    maptick_by_players = 0
-    td_by_players = 0
-    avg_maptick = 0
-    avg_players = 0
-    avg_td = 0
+    def average_if_valid(numerator, denominator): return numerator / denominator if denominator > 0 else 0
+    def average_if_exists(numerator, denominator): return average_if_valid(numerator, denominator) if has_sendmaps_profiler_logs == True else 0
 
-    averages = {}
+    td_per_player = average_if_exists(td_total, player_total)
+    if td_per_player > 1.2:
+        td_per_player = 0.6
 
-    # absolute cost values: either milliseconds, microseconds, or total movables examined
-    sendmaps_cost_per_tick = 0
-    sendmaps_clients = 0
-    avg_cost_per_client = 0
-    avg_cost_movable_changes = 0
-    avg_cost_turf_vis_contents = 0
-    avg_cost_hud_image_vis_contents = 0
-    avg_cost_turfs_in_range = 0
-    avg_cost_obj_changes = 0
-    avg_cost_mob_changes = 0
-    avg_movables_examined = 0
+    to_write = {}
 
-    def average_if_valid(numerator, denominator): return to_microseconds(
-        numerator / denominator) if denominator > 0 else 0
+    to_write["id"] = id
+    to_write["maptick_to_player"] = average_if_valid(maptick_total, player_total)
+    to_write["maptick"] = average_if_valid(maptick_total, lines_read)
+    to_write["players"] = average_if_valid(player_total, lines_read)
+    to_write["td"] = average_if_exists(td_total, lines_read)
+    
+    to_write["td_to_player"] = td_per_player
 
-    if has_sendmaps_profiler_logs:
-        # the cost vars are always in seconds which makes most of them very small. converting to microseconds is much better
-        sendmaps_cost_per_tick = to_microseconds(
-            sendmaps_total_cost / sendmaps_total_calls)
-        sendmaps_clients = sendmaps_client_calls / sendmaps_total_calls
-
-        avg_cost_per_client = average_if_valid(sendmaps_total_cost, sendmaps_client_calls)
-        if movable_changes_calls:
-            avg_cost_movable_changes = to_microseconds(movable_changes_cost / movable_changes_calls)
-        if check_turf_vis_contents_calls:
-            avg_cost_turf_vis_contents = to_microseconds(check_turf_vis_contents_cost / check_turf_vis_contents_calls)
-        if check_hud_image_vis_contents_calls:
-            avg_cost_hud_image_vis_contents = to_microseconds(check_hud_image_vis_contents_cost / check_hud_image_vis_contents_calls)
-        if loop_turfs_in_range_calls:
-            avg_cost_turfs_in_range = to_microseconds(loop_turfs_in_range_cost / loop_turfs_in_range_calls)
-        if obj_changes_calls:
-            avg_cost_obj_changes = to_microseconds(obj_changes_cost / obj_changes_calls)
-        if mob_changes_calls:
-            avg_cost_mob_changes = to_microseconds(
-                mob_changes_cost / mob_changes_calls)
-        if sendmaps_client_calls:
-            avg_movables_examined = movables_examined / sendmaps_client_calls
-
-    if player_total:
-        maptick_by_players = maptick_total / player_total
-        td_by_players = td_total / player_total
-    if lines_read:
-        avg_maptick = maptick_total / lines_read
-        avg_players = player_total / lines_read
-        avg_td = td_total / lines_read
+    to_write["sendmaps_cost_per_tick"] = to_microseconds(average_if_exists(sendmaps_total_cost, sendmaps_total_calls))
+    to_write["per_client"] = to_microseconds(average_if_exists(sendmaps_client_cost, sendmaps_client_calls))
+    to_write["look_for_movable_changes"] = to_microseconds(average_if_exists(movable_changes_cost, movable_changes_calls))
+    to_write["check_turf_vis_conts"] = to_microseconds(average_if_exists(check_turf_vis_contents_cost, check_turf_vis_contents_calls))
+    to_write["check_hud/image_vis_contents"] = to_microseconds(average_if_exists(check_hud_image_vis_contents_cost, check_hud_image_vis_contents_calls))
+    to_write["turfs_in_range"] = to_microseconds(average_if_exists(loop_turfs_in_range_cost, loop_turfs_in_range_calls))
+    to_write["obj_changes"] = to_microseconds(average_if_exists(obj_changes_cost, obj_changes_calls))
+    to_write["mob_changes"] = to_microseconds(average_if_exists(mob_changes_cost, mob_changes_calls))
+    to_write["movables_examined"] = average_if_exists(movables_examined, sendmaps_client_calls)
 
     # finalize our data collection by map, server, and generic single stat files
     pending = [map, server, "maptick", "highpass_maptick"]
     for index in pending:
         if index not in data:  # If one doesn't already exist, make a new list to put our map data into
             data[index] = []
-        if index == "highpass_maptick" and (maptick_by_players > highpass):
+        if index == "highpass_maptick" and (to_write["maptick_to_player"] > highpass):
             continue
-        to_write = {}
-
-        to_write["id"] = id
-        to_write["maptick_to_player"] = maptick_by_players
-        to_write["maptick"] = avg_maptick
-        to_write["players"] = avg_players
-        to_write["td"] = avg_td
-
-        if td_by_players > 1.2:
-            td_by_players = 0.6
-        to_write["td_to_player"] = td_by_players
-
-        to_write["sendmaps_cost_per_tick"] = sendmaps_cost_per_tick
-        to_write["per_client"] = avg_cost_per_client
-        to_write["look_for_movable_changes"] = avg_cost_movable_changes
-        to_write["check_turf_vis_conts"] = avg_cost_turf_vis_contents
-        to_write["check_hud/image_vis_contents"] = avg_cost_hud_image_vis_contents
-        to_write["turfs_in_range"] = avg_cost_turfs_in_range
-        to_write["obj_changes"] = avg_cost_obj_changes
-        to_write["mob_changes"] = avg_cost_mob_changes
-        to_write["movables_examined"] = avg_movables_examined
-
-        data[index].append(to_write)
+        
+        #print(to_write.copy())
+        data[index].append(to_write.copy())
 
     print(f"Read [{id}] [{map}] [{server}]")
 
