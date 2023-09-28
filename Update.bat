@@ -1,12 +1,15 @@
-#!/bin/sh
+@ECHO OFF
 
-@echo off
-pushd "%~dp0"
-cd root
-echo Grabbing Logs
-py RawLogsScraper.py
-echo Averaging CSV files
-py MaptickAverager.py
-echo Plotting Graphs
+PUSHD "%~dp0"
+CD root
+
+ECHO Grabbing Logs
+py -3.6 RawLogsScraper.py
+
+ECHO Averaging CSV files
+py -3.6 MaptickAverager.py
+
+ECHO Plotting Graphs
 gnuplot maptick_plot.gnuplot
-popd "%~dp0"
+
+POPD "%~dp0"
