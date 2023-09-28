@@ -163,7 +163,7 @@ def clearDataFile():
 
 #owning mso with facts and logic (you need beautiful soup to parse raw logs for reasons)
 #from bs4 import BeautifulSoup
-#cookie_file = "mood.json"
+#cookie_file = "config/header_config.json"
 #do_not_post_this_4head = open(cookie_file) 
 #fakingIdentity = json.load(do_not_post_this_4head) #Loads a .json file containing the cookie and other params to send to mso
 #do_not_post_this_4head.close()
