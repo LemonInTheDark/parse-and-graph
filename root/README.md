@@ -14,7 +14,7 @@ In the event of an error, this info can be found in [data/scraping.json](data/sc
 
 Also has some internal procs you can use to look at how many holes you have. No way to self heal if they happen before buffering was introduced though.
 
-Oh right uh, mood.json exists. Create one and edit it to match your server creds if for some reason you want to pull from raw logs (Don't forget to change the url)
+Oh right uh, `header_config.json` exists. One should be created when `Setup.bat` was run in the [config](config) folder. Edit it to match your server creds if for some reason you want to pull from raw logs (Don't forget to change the url)
 
 ### [MaptickAverager](MaptickAverager.py)
 
